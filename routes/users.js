@@ -24,20 +24,26 @@ router.get('/change',function(req,res,next){
 //   res.send('Hello world1');
 // });
 router.post('/login',function(req,res,next){
+  var username=req.body.username
+  var password=req.body.password
+  console.log(username,password)
   client=udb.Connection();
-  var sql="SELECT * FROM `info` WHERE account='22222';"
+  var sql="SELECT COUNT(*) AS num FROM `info` WHERE account='"+username+"' AND `password`='"+password+"';"
   client.query(sql,function(err,rows){
     if(err){
       res.end('false')
     }else{
-      if(rows.length==0){
-        res.end('false')
-      }else{
-        if(rows[0].password=='2222'){
-          console.log(rows)
-          res.end(JSON.stringify(rows))
-        }
-      }
+      // if(rows.length==0){
+      //   res.end('false')
+      // }else{
+      //   if(rows[0].password==password){
+      //     console.log(rows)
+      //     // res.end("1111")
+      //     res.end(JSON.stringify(rows))
+      //   }
+      // }
+      console.log(rows)
+      res.end(JSON.stringify(rows))
     }
   })
   client.end()
@@ -48,7 +54,7 @@ router.get('/companysinfo',function(req,res,next){
   var sql="SELECT * FROM company;"
   client.query(sql,function(err,rows){
     if(!err){
-      res.end(JSON.stringify(rows))
+      res.end(JSON.stringify(rows)) //返回前端
     }else{ 
       // res.end('false')
       res.end(JSON.stringify(err))
@@ -60,13 +66,13 @@ router.get('/companysinfo',function(req,res,next){
 
 router.post('/deletecompany',function(req,res,next){
   // var datalist=JSON.parse(req.body);
-  var id=req.body.id  //这里只有req.query里面有数据 我也不知道为什么和之前的不一样 看了一下解释 应该是我的bodyParser 有问题就用不了
+  var id=req.body.id  // 这里时拿前端的数据 //这里只有req.query里面有数据 我也不知道为什么和之前的不一样 看了一下解释 应该是我的bodyParser 有问题就用不了
   console.log(req.body); // 改成了application/json 问题就解决了 仅仅是在postman上面的操作
-  client=udb.Connection();
-  var sql="DELETE FROM company WHERE company.id='"+id+"';"
-  client.query(sql,function(err,rows){
+  client=udb.Connection(); //连接数据库
+  var sql="DELETE FROM company WHERE company.id='"+id+"';" //完善sql语句
+  client.query(sql,function(err,rows){  //执行sql语句 err是错误  rows是返回信息
     if(!err){
-      res.end('succesdeletecompany')
+      res.end('succesdeletecompany')   //res.end 发送回前端
     }else{ 
       res.end('falsedeletecompany')
     }
@@ -79,7 +85,7 @@ router.post('/deletecompany',function(req,res,next){
       res.end('falsedeletecompany')
     }
   })
-  client.end()
+  client.end() //关闭数据库
 })
 
 
@@ -238,7 +244,6 @@ router.post('/updatefrom',function(req,res,next){
   client.end()
 })
 router.get('/newfrom',function(req,res,next){
-
   // var newid=2;
   client=udb.Connection();
   var sql="INSERT INTO evaluation (companyid,fromno,fromid,name,bigno,smallno,content,basis) SELECT (SELECT MAX(id) from company),fromno,id,name,bigno,smallno,content,basis FROM from1;"
